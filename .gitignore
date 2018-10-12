@@ -4,6 +4,7 @@
 .settings/
 .svn/
 target/
+logback/
 *.jar
 *.log
 *.iml
@@ -12,4 +13,6 @@ application-local.*
 
 /src/main/java/it/tim/model/integration/generated/*
 /src/main/java/META-INF/sun-jaxb.episode
+/src/main/resources/application.yml
+/src/main/resources/keystore.jks
 /bin/

@@ -1,0 +1,199 @@
+#Custom
+integration:
+  soap:
+    bonusbasepath: "${bonus_path:http://localhost:8088}"
+    bonusvalue: "${bonus_value:PrepaidMobileCreditMgmt}"
+
+builtin:
+  keystorepath: "${keystore_path:/keystore/keystore.jks}"
+  keystoreAlias: "${KEYSTORE_ALIAS:tomcat}"
+  keystorePass: "${KEYSTORE_PASS:springboot}"
+  httpsProtocols: "${HTTPS_PROTOCOLS:SSLv3,SSLv2Hello,TLSv1,TLSv1.2}"         
+---
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          semaphore:
+             maxConcurrentRequests: "${HYSTRIX_ISOLATION_SEMAPHORE_MAX_REQUESTS:50}"
+          strategy: "${HYSTRIX_STRATEGY:THREAD}"
+          thread:
+            timeoutInMilliseconds: "${HYSTRIX_TIMEOUT:20000}"
+            interruptOnTimeout: "${HYSTRIX_ISOLATION_THREAD_INTERRUPT_ON_TIMEOUT:true}"
+            interruptOnCancel: "${HYSTRIX_ISOLATION_THREAD_INTERRUPT_ON_CANCEL:false}" 
+        timeout:
+          enabled: "${HYSTRIX_TIMEOUT_ENABLED:true}"     
+      fallback:
+        isolation:
+          semaphore:
+            maxConcurrentRequests: "${HYSTRIX_FALLBACK_MAX_CONCURRENT_REQUESTS:10}" 
+        enabled: "${HYSTRIX_FALLBACK_ENABLED:true}"
+      circuitBreaker:
+        enabled: "${HYSTRIX_CIRCUIT_BREAKER_ENABLED:true}"
+        requestVolumeThreshold: "${HYSTRIX_CIRCUIT_BREAKER_REQUEST_VOLUME_THRESHOLD:20}"
+        sleepWindowInMilliseconds: "${HYSTRIX_CIRCUIT_BREAKER_SLEEP:5000}"  
+        errorThresholdPercentage: "${HYSTRIX_CIRCUIT_BREAKER_ERROR_PERCENTAGE:50}"
+        forceOpen: "${HYSTRIX_CIRCUIT_BREAKER_FORCE_OPEN:false}"
+        forceClosed: "${HYSTRIX_CIRCUIT_BREAKER_FORCE_CLOSE:false}"
+      requestCache:
+        enabled: "${HYSTRIX_REQUEST_CACHE_ENABLED:true}"  
+  threadpool:
+    default:
+      coreSize: "${HYSTRIX_THPOOL_CORESIZE:40}"
+      maximumSize: "${HYSTRIX_THPOOL_MAXSIZE:40}"
+      maxQueueSize: "${HYSTRIX_THPOOL_MAXQUEUESIZE:-1}"
+      queueSizeRejectionThreshold: "${HYSTRIX_THPOOL_REJECTION_THRESHOLD:5}" 
+      keepAliveTimeMinutes: "${HYSTRIX_THPOOL_KEEP_ALIVE_MINUTES:1}"
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: "${HTTP_CONN_TIMEOUT:5000}"
+        readTimeout: "${HTTP_DEF_TIMEOUT:10000}"
+        loggerLevel: "${FEIGN_LOG_LEVEL:FULL}"
+      bonusClient:
+        connectTimeout: "${HTTP_CONN_TIMEOUT:5000}"
+        readTimeout: "${HTTP_BANCASELLA_TIMEOUT:10000}"
+        loggerLevel: "${FEIGN_LOG_LEVEL:FULL}"
+  
+---
+debug: true
+spring:
+  profiles: dev,default
+management:
+   security.enabled: "${security.enabled:false}"
+logging:
+  level:
+    root: "${ROOT_LOG_LEVEL:INFO}"
+    it.tim.pin: "${SERVICE_LOG_LEVEL:DEBUG}"
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [${spring.application.name}] [trace=%16X{X-B3-TraceId:-},span=%16X{X-B3-SpanId:-}] %-30logger{0}: %m%n"
+  rest:
+    controller:
+      "it.tim.bonus.web.BonusController"
+server:
+  port: "${port:8090}"
+  tomcat: 
+    accept-count: "${accept-count:50}"
+    max-connections: "${max-connections:50}"       
+    max-threads: "${max-threads:25}"
+    min-spare-threads: "${min-spare-threads:15}" 
+---
+spring:
+  profiles: systest
+management:
+   security.enabled: "${security.enabled:false}"  
+logging:
+  level:
+    root: "${ROOT_LOG_LEVEL:INFO}"
+    it.tim.topup: "${SERVICE_LOG_LEVEL:DEBUG}"
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [${spring.application.name}] [trace=%16X{X-B3-TraceId:-},span=%16X{X-B3-SpanId:-}] %-30logger{0}: %m%n"
+  rest:
+    controller:
+      "it.tim.bonus.web.BonusController"
+  config: "logback/logback.xml"
+logback.access:
+  # Whether to enable auto-configuration.
+  # Defaults to true.
+  enabled: true
+  # The location of the configuration file.
+  # Auto-detected by default:
+  #   1. "classpath:logback-access-test.xml"
+  #   2. "classpath:logback-access.xml"
+  #   3. "classpath:logback-access-test-spring.xml"
+  #   4. "classpath:logback-access-spring.xml"
+  #   5. "classpath:net/rakugakibox/spring/boot/logback/access/logback-access-spring.xml"
+  config: "logback/logback-access.xml"       
+server:
+  port: "${port:8080}"
+  tomcat: 
+    accept-count: "${accept-count:50}"
+    max-connections: "${max-connections:50}"       
+    max-threads: "${max-threads:25}"
+    min-spare-threads: "${min-spare-threads:15}" 
+---
+spring:
+  profiles: prod
+management:
+   security.enabled: "${security.enabled:false}" 
+logging:
+  level:
+    root: "${ROOT_LOG_LEVEL:INFO}"
+    it.tim.topup: "${SERVICE_LOG_LEVEL:DEBUG}"
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [${spring.application.name}] [trace=%16X{X-B3-TraceId:-},span=%16X{X-B3-SpanId:-}] %-30logger{0}: %m%n"
+  rest:
+    controller:
+      "it.tim.bonus.web.BonusController"
+  config: "logback/logback.xml"
+logback.access:
+  # Whether to enable auto-configuration.
+  # Defaults to true.
+  enabled: true
+  # The location of the configuration file.
+  # Auto-detected by default:
+  #   1. "classpath:logback-access-test.xml"
+  #   2. "classpath:logback-access.xml"
+  #   3. "classpath:logback-access-test-spring.xml"
+  #   4. "classpath:logback-access-spring.xml"
+  #   5. "classpath:net/rakugakibox/spring/boot/logback/access/logback-access-spring.xml"
+  config: "logback/logback-access.xml"       
+server:
+  port: 8443
+  tomcat: 
+    accept-count: "${accept-count:50}"
+    max-connections: "${max-connections:50}"       
+    max-threads: "${max-threads:25}"
+    min-spare-threads: "${min-spare-threads:15}" 
+  ssl:
+    enabled: true
+    key-alias: tomcat
+    key-password: springboot
+    key-store: file:///keystore/Identity.jks
+    key-store-provider: SUN
+    key-store-type: JKS
+    key-store-password: springboot
+---
+spring:
+  profiles: prodflat
+management:
+   security.enabled: "${security.enabled:false}" 
+logging:
+  level:
+    root: "${ROOT_LOG_LEVEL:INFO}"
+    it.tim.topup: "${SERVICE_LOG_LEVEL:DEBUG}"
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [${spring.application.name}] [trace=%16X{X-B3-TraceId:-},span=%16X{X-B3-SpanId:-}] %-30logger{0}: %m%n"
+  rest:
+    controller:
+      "it.tim.bonus.web.BonusController"
+logback.access:
+  # Whether to enable auto-configuration.
+  # Defaults to true.
+  enabled: true
+  # The location of the configuration file.
+  # Auto-detected by default:
+  #   1. "classpath:logback-access-test.xml"
+  #   2. "classpath:logback-access.xml"
+  #   3. "classpath:logback-access-test-spring.xml"
+  #   4. "classpath:logback-access-spring.xml"
+  #   5. "classpath:net/rakugakibox/spring/boot/logback/access/logback-access-spring.xml"
+  config: "logback/logback-access.xml"       
+server:
+  port: 8443
+  tomcat: 
+    accept-count: "${accept-count:50}"
+    max-connections: "${max-connections:50}"       
+    max-threads: "${max-threads:25}"
+    min-spare-threads: "${min-spare-threads:15}" 
+  ssl:
+    enabled: true
+    key-alias: tomcat
+    key-password: springboot
+    key-store: file:///keystore/Identity.jks
+    key-store-provider: SUN
+    key-store-type: JKS
+    key-store-password: springboot    
